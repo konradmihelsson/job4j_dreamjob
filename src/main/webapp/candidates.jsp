@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -27,7 +27,6 @@
 </head>
 <body>
 <div class="container pt-3">
-
     <div class="row">
         <div class="card"
              style="width: 100%">
@@ -49,6 +48,15 @@
                                     <i class="fa fa-edit mr-3"></i>
                                 </a>
                                 <c:out value="${can.name}"/>
+                            </td>
+                            <td>
+                                <img src="<c:url value='/download?name=${can.id}'/>" width="100px" height="100px" alt="image"/>
+                            </td>
+                            <td>
+                                <a href='<c:url value="/candidate/upload.jsp?id=${can.id}"/>'>
+                                    <i class="fa fa-camera-retro mr-3"></i>
+                                </a>
+                                Change photo
                             </td>
                         </tr>
                     </c:forEach>
