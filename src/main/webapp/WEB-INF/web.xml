@@ -29,6 +29,10 @@
         <servlet-name>UploadServlet</servlet-name>
         <servlet-class>ru.job4j.dream.servlet.UploadServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CandidateRemoveServlet</servlet-name>
+        <servlet-class>ru.job4j.dream.servlet.CandidateRemoveServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>PostServlet</servlet-name>
@@ -49,5 +53,9 @@
     <servlet-mapping>
         <servlet-name>UploadServlet</servlet-name>
         <url-pattern>/upload</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CandidateRemoveServlet</servlet-name>
+        <url-pattern>/candidate_remove.do</url-pattern>
     </servlet-mapping>
 </web-app>

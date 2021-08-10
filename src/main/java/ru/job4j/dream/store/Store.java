@@ -60,4 +60,8 @@ public class Store {
     public Candidate findCandidateById(int id) {
         return candidates.get(id);
     }
+
+    public void removeCandidateById(int id) {
+        candidates.remove(id);
+    }
 }

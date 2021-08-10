@@ -27,7 +27,6 @@
                         <input type="file" name="file">
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
         </div>

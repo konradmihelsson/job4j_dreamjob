@@ -50,6 +50,9 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Сохранить</button>
                 </form>
+                <form action="<%=request.getContextPath()%>/candidate_remove.do?id=<%=candidate.getId()%>" method="post">
+                    <button type="submit" class="btn btn-warning">Удалить</button>
+                </form>
             </div>
         </div>
     </div>
