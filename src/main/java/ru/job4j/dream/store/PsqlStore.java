@@ -1,11 +1,14 @@
 package ru.job4j.dream.store;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.dbcp2.BasicDataSource;
 import ru.job4j.dream.model.Candidate;
 import ru.job4j.dream.model.Post;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +20,8 @@ import java.util.Properties;
 
 public class PsqlStore implements Store {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PsqlStore.class.getName());
+
     private final BasicDataSource pool = new BasicDataSource();
 
     private PsqlStore() {
@@ -25,13 +30,13 @@ public class PsqlStore implements Store {
                 new FileReader("db.properties")
         )) {
             cfg.load(io);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+        } catch (IOException e) {
+            LOG.error("Exception logging", e);
         }
         try {
             Class.forName(cfg.getProperty("jdbc.driver"));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+        } catch (ClassNotFoundException e) {
+            LOG.error("Exception logging", e);
         }
         pool.setDriverClassName(cfg.getProperty("jdbc.driver"));
         pool.setUrl(cfg.getProperty("jdbc.url"));
@@ -61,8 +66,8 @@ public class PsqlStore implements Store {
                     posts.add(new Post(it.getInt("id"), it.getString("name")));
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
         }
         return posts;
     }
@@ -79,7 +84,7 @@ public class PsqlStore implements Store {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception logging", e);
         }
         return candidates;
     }
@@ -113,8 +118,8 @@ public class PsqlStore implements Store {
                     post.setId(id.getInt(1));
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
         }
         return post;
     }
@@ -127,7 +132,7 @@ public class PsqlStore implements Store {
             ps.setInt(2, post.getId());
             ps.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception logging", e);
         }
     }
 
@@ -143,7 +148,7 @@ public class PsqlStore implements Store {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception logging", e);
         }
         return candidate;
     }
@@ -156,7 +161,7 @@ public class PsqlStore implements Store {
             ps.setInt(2, candidate.getId());
             ps.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception logging", e);
         }
     }
 
@@ -173,7 +178,25 @@ public class PsqlStore implements Store {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception logging", e);
+        }
+        return result;
+    }
+
+    @Override
+    public Candidate findCandidateById(int id) {
+        Candidate result = null;
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps = cn.prepareStatement("SELECT id, name FROM candidates where id = ?")
+        ) {
+            ps.setInt(1, id);
+            try (ResultSet it = ps.executeQuery()) {
+                if (it.next()) {
+                    result = new Candidate(it.getInt(1), it.getString(2));
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
         }
         return result;
     }
@@ -185,7 +208,7 @@ public class PsqlStore implements Store {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Exception logging", e);
         }
     }
 }

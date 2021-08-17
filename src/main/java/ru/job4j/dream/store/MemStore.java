@@ -31,14 +31,17 @@ public class MemStore implements Store {
         return INST;
     }
 
+    @Override
     public Collection<Post> findAllPosts() {
         return posts.values();
     }
 
+    @Override
     public Collection<Candidate> findAllCandidates() {
         return candidates.values();
     }
 
+    @Override
     public void save(Post post) {
         if (post.getId() == 0) {
             post.setId(POST_ID.incrementAndGet());
@@ -46,10 +49,7 @@ public class MemStore implements Store {
         posts.put(post.getId(), post);
     }
 
-    public Post findPostById(int id) {
-        return posts.get(id);
-    }
-
+    @Override
     public void save(Candidate candidate) {
         if (candidate.getId() == 0) {
             candidate.setId(CANDIDATE_ID.incrementAndGet());
@@ -57,10 +57,17 @@ public class MemStore implements Store {
         candidates.put(candidate.getId(), candidate);
     }
 
+    @Override
+    public Post findPostById(int id) {
+        return posts.get(id);
+    }
+
+    @Override
     public Candidate findCandidateById(int id) {
         return candidates.get(id);
     }
 
+    @Override
     public void removeCandidateById(int id) {
         candidates.remove(id);
     }

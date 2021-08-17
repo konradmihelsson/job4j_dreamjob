@@ -16,6 +16,7 @@ public class PsqlMain {
         store.save(new Candidate(0, "Java Junior developer"));
         store.save(new Candidate(1, "Java Junior developer update"));
         store.save(new Candidate(0, "Java Middle developer"));
+        System.out.println(store.findCandidateById(2).getName());
         store.removeCandidateById(1);
         for (Candidate candidate : store.findAllCandidates()) {
             System.out.println(candidate.getId() + " " + candidate.getName());

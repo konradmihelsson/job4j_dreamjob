@@ -1,5 +1,7 @@
 package ru.job4j.dream.servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -16,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class UploadServlet extends HttpServlet {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UploadServlet.class.getName());
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -48,7 +52,7 @@ public class UploadServlet extends HttpServlet {
                 }
             }
         } catch (FileUploadException e) {
-            e.printStackTrace();
+            LOG.error("Exception logging", e);
         }
         resp.sendRedirect(req.getContextPath() + "/candidates.do");
     }
