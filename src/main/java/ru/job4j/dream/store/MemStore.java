@@ -2,6 +2,7 @@ package ru.job4j.dream.store;
 
 import ru.job4j.dream.model.Candidate;
 import ru.job4j.dream.model.Post;
+import ru.job4j.dream.model.User;
 
 import java.util.Collection;
 import java.util.Map;
@@ -58,6 +59,11 @@ public class MemStore implements Store {
     }
 
     @Override
+    public void save(User user) {
+
+    }
+
+    @Override
     public Post findPostById(int id) {
         return posts.get(id);
     }
@@ -65,6 +71,11 @@ public class MemStore implements Store {
     @Override
     public Candidate findCandidateById(int id) {
         return candidates.get(id);
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return null;
     }
 
     @Override

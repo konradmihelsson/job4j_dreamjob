@@ -2,6 +2,7 @@ package ru.job4j.dream.store;
 
 import ru.job4j.dream.model.Candidate;
 import ru.job4j.dream.model.Post;
+import ru.job4j.dream.model.User;
 
 public class PsqlMain {
     public static void main(String[] args) {
@@ -16,10 +17,20 @@ public class PsqlMain {
         store.save(new Candidate(0, "Java Junior developer"));
         store.save(new Candidate(1, "Java Junior developer update"));
         store.save(new Candidate(0, "Java Middle developer"));
-        System.out.println(store.findCandidateById(2).getName());
+        System.out.println(store.findCandidateById(5).getName());
         store.removeCandidateById(1);
         for (Candidate candidate : store.findAllCandidates()) {
             System.out.println(candidate.getId() + " " + candidate.getName());
         }
+
+        User user = new User();
+        user.setName("Admin");
+        user.setEmail("root@local");
+        user.setPassword("root");
+        store.save(user);
+        store.save(user);
+        User user2 = store.findUserByEmail("root@local");
+        System.out.println("User ID: " + user2.getId() + ", User Name: " + user2.getName() + ", User Email: "
+        + user2.getEmail() + ", User Password: " + user2.getPassword());
     }
 }

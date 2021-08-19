@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.commons.dbcp2.BasicDataSource;
 import ru.job4j.dream.model.Candidate;
 import ru.job4j.dream.model.Post;
+import ru.job4j.dream.model.User;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -107,9 +108,20 @@ public class PsqlStore implements Store {
         }
     }
 
+    @Override
+    public void save(User user) {
+        if (user.getId() == 0) {
+            create(user);
+        } else {
+            update(user);
+        }
+    }
+
     private Post create(Post post) {
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement("INSERT INTO post(name) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS)
+             PreparedStatement ps =
+                     cn.prepareStatement("INSERT INTO post(name) VALUES (?)",
+                             PreparedStatement.RETURN_GENERATED_KEYS)
         ) {
             ps.setString(1, post.getName());
             ps.execute();
@@ -138,7 +150,9 @@ public class PsqlStore implements Store {
 
     private Candidate create(Candidate candidate) {
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement("INSERT INTO candidates(name) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS)
+             PreparedStatement ps =
+                     cn.prepareStatement("INSERT INTO candidates(name) VALUES (?)",
+                             PreparedStatement.RETURN_GENERATED_KEYS)
         ) {
             ps.setString(1, candidate.getName());
             ps.execute();
@@ -159,6 +173,42 @@ public class PsqlStore implements Store {
         ) {
             ps.setString(1, candidate.getName());
             ps.setInt(2, candidate.getId());
+            ps.execute();
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
+        }
+    }
+
+    private User create(User user) {
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps =
+                     cn.prepareStatement("INSERT INTO users(name, email, password) VALUES (?, ?, ?)",
+                             PreparedStatement.RETURN_GENERATED_KEYS)
+        ) {
+            ps.setString(1, user.getName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPassword());
+            ps.execute();
+            try (ResultSet id = ps.getGeneratedKeys()) {
+                if (id.next()) {
+                    user.setId(id.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
+        }
+        return user;
+    }
+
+    private void update(User user) {
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps =
+                     cn.prepareStatement("UPDATE users set name = ?, email = ?, password = ? where id = ?")
+        ) {
+            ps.setString(1, user.getName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPassword());
+            ps.setInt(4, user.getId());
             ps.execute();
         } catch (SQLException e) {
             LOG.error("Exception logging", e);
@@ -193,6 +243,29 @@ public class PsqlStore implements Store {
             try (ResultSet it = ps.executeQuery()) {
                 if (it.next()) {
                     result = new Candidate(it.getInt(1), it.getString(2));
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
+        }
+        return result;
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        User result = null;
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps =
+                     cn.prepareStatement("SELECT id, name, email, password FROM users where email = ?")
+        ) {
+            ps.setString(1, email);
+            try (ResultSet it = ps.executeQuery()) {
+                if (it.next()) {
+                    result = new User();
+                    result.setId(it.getInt(1));
+                    result.setName(it.getString(2));
+                    result.setEmail(it.getString(3));
+                    result.setPassword(it.getString(4));
                 }
             }
         } catch (SQLException e) {
