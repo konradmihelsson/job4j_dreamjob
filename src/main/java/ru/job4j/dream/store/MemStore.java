@@ -94,4 +94,16 @@ public class MemStore implements Store {
     public void removeCandidateById(int id) {
         candidates.remove(id);
     }
+
+    @Override
+    public User findUserByName(String name) {
+        User result = null;
+        for (User user : users.values()) {
+            if (name.equals(user.getName())) {
+                result = user;
+                break;
+            }
+        }
+        return result;
+    }
 }

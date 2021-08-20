@@ -274,6 +274,28 @@ public class PsqlStore implements Store {
         return result;
     }
 
+    public User findUserByName(String name) {
+        User result = null;
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps =
+                     cn.prepareStatement("SELECT id, name, email, password FROM users where name = ?")
+        ) {
+            ps.setString(1, name);
+            try (ResultSet it = ps.executeQuery()) {
+                if (it.next()) {
+                    result = new User();
+                    result.setId(it.getInt(1));
+                    result.setName(it.getString(2));
+                    result.setEmail(it.getString(3));
+                    result.setPassword(it.getString(4));
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
+        }
+        return result;
+    }
+
     public void removeCandidateById(int id) {
         try (Connection cn = pool.getConnection();
              PreparedStatement ps = cn.prepareStatement("DELETE FROM candidates where id = ?")

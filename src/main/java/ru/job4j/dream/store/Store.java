@@ -25,4 +25,7 @@ public interface Store {
     User findUserByEmail(String email);
 
     void removeCandidateById(int id);
+
+    User findUserByName(String name);
 }
+

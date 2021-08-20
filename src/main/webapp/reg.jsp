@@ -81,6 +81,11 @@
                         </label>
                     </div>
                     <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                    <c:if test="${not empty error}">
+                        <div style="color:#ff0000; font-weight: bold; margin: 30px 0;">
+                                ${error}
+                        </div>
+                    </c:if>
                 </form>
             </div>
         </div>
