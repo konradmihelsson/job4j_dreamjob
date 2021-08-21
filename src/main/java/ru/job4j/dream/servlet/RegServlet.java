@@ -13,8 +13,12 @@ public class RegServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         User user = PsqlStore.instOf().findUserByName(req.getParameter("name"));
+        User userWithSameEmail = PsqlStore.instOf().findUserByEmail(req.getParameter("email"));
         if (user != null) {
             req.setAttribute("error", "Такой пользователь уже существует! Укажите другое имя.");
+            req.getRequestDispatcher("reg.jsp").forward(req, resp);
+        } else if (userWithSameEmail != null) {
+            req.setAttribute("error", "Такой email уже используется! Укажите другой email.");
             req.getRequestDispatcher("reg.jsp").forward(req, resp);
         } else {
             user = new User();
