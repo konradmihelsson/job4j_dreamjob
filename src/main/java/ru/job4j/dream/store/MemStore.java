@@ -12,22 +12,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MemStore implements Store {
 
     private static final Store INST = new MemStore();
-    private static final AtomicInteger POST_ID = new AtomicInteger(4);
-    private static final AtomicInteger CANDIDATE_ID = new AtomicInteger(4);
-    private static final AtomicInteger USER_ID = new AtomicInteger(4);
+    private static final AtomicInteger POST_ID = new AtomicInteger();
+    private static final AtomicInteger CANDIDATE_ID = new AtomicInteger();
+    private static final AtomicInteger USER_ID = new AtomicInteger();
 
     private final Map<Integer, Post> posts = new ConcurrentHashMap<>();
     private final Map<Integer, Candidate> candidates = new ConcurrentHashMap<>();
     private final Map<Integer, User> users = new ConcurrentHashMap<>();
 
     private MemStore() {
-        posts.put(1, new Post(1, "Junior Java Job"));
-        posts.put(2, new Post(2, "Middle Java Job"));
-        posts.put(3, new Post(3, "Senior Java Job"));
-
-        candidates.put(1, new Candidate(1, "Junior Java"));
-        candidates.put(2, new Candidate(2, "Middle Java"));
-        candidates.put(3, new Candidate(3, "Senior Java"));
     }
 
     public static Store instOf() {
