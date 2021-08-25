@@ -19,6 +19,7 @@ public class MemStore implements Store {
     private final Map<Integer, Post> posts = new ConcurrentHashMap<>();
     private final Map<Integer, Candidate> candidates = new ConcurrentHashMap<>();
     private final Map<Integer, User> users = new ConcurrentHashMap<>();
+    private final Map<Integer, String> cities = new ConcurrentHashMap<>();
 
     private MemStore() {
     }
@@ -98,5 +99,32 @@ public class MemStore implements Store {
             }
         }
         return result;
+    }
+
+    @Override
+    public int getCityIdByCityName(String cityName) {
+        int result = -1;
+        for (Map.Entry<Integer, String> pair : cities.entrySet()) {
+            if (cityName.equals(pair.getValue())) {
+                result = pair.getKey();
+                break;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<Integer, String> findAllCities() {
+        return cities;
+    }
+
+    @Override
+    public Collection<Post> findAllPostsForLastDay() {
+        return findAllPosts();
+    }
+
+    @Override
+    public Collection<Candidate> findAllCandidatesForLastDay() {
+        return findAllCandidates();
     }
 }

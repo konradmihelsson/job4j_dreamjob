@@ -5,6 +5,7 @@ import ru.job4j.dream.model.Post;
 import ru.job4j.dream.model.User;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface Store {
 
@@ -27,5 +28,12 @@ public interface Store {
     void removeCandidateById(int id);
 
     User findUserByName(String name);
-}
 
+    int getCityIdByCityName(String cityName);
+
+    Map<Integer, String> findAllCities();
+
+    Collection<Post> findAllPostsForLastDay();
+
+    Collection<Candidate> findAllCandidatesForLastDay();
+}

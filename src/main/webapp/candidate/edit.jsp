@@ -21,15 +21,50 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: 'GET',
+                url: 'http://localhost:8080/dreamjob/city',
+                dataType: 'json'
+            }).done(function (data) {
+                for (var city of data) {
+                    $('#candidateCity').append('<option>' + city + '</option>')
+                }
+            }).fail(function (err) {
+                console.log(err);
+            });
+        });
+    </script>
 
     <title>Работа мечты</title>
 </head>
 <body>
 <%
     String id = request.getParameter("id");
-    Candidate candidate = new Candidate(0, "");
+    Candidate candidate = new Candidate(0, "", 0);
     if (id != null) {
-        candidate = PsqlStore.instOf().findCandidateById(Integer.valueOf(id));
+        candidate = PsqlStore.instOf().findCandidateById(Integer.parseInt(id));
     }
 %>
 <div class="container pt-3">
@@ -75,17 +110,36 @@
                 <% } %>
             </div>
             <div class="card-body">
-                <form action="<%=request.getContextPath()%>/candidates.do?id=<%=candidate.getId()%>" method="post">
+                <form class="needs-validation"
+                      action="<%=request.getContextPath()%>/candidates.do?id=<%=candidate.getId()%>" method="post"
+                      novalidate>
                     <div class="form-group">
-                        <label>Имя
-                        <input type="text" class="form-control" name="candidateName" value="<%=candidate.getName()%>">
+                        <label>Имя:
+                            <input type="text" class="form-control" name="candidateName"
+                                   value="<%=candidate.getName()%>" required>
+                            <div class="invalid-feedback">
+                                Введите имя кандидата.
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Город:
+                            <select class="form-control" id="candidateCity" name="candidateCity" required>
+                                <option disabled selected>Выберите город</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Выберите город.
+                            </div>
                         </label>
                     </div>
                     <button type="submit" class="btn btn-primary">Сохранить</button>
                 </form>
-                <form action="<%=request.getContextPath()%>/candidate_remove.do?id=<%=candidate.getId()%>" method="post">
+                <% if (id != null) { %>
+                <form action="<%=request.getContextPath()%>/candidate_remove.do?id=<%=candidate.getId()%>"
+                      method="post">
                     <button type="submit" class="btn btn-warning">Удалить</button>
                 </form>
+                <% } %>
             </div>
         </div>
     </div>

@@ -1,3 +1,4 @@
+<%@ page import="ru.job4j.dream.store.PsqlStore" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!doctype html>
@@ -73,6 +74,7 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <c:set var="cities" value="<%=PsqlStore.instOf().findAllCities()%>"/>
                     <c:forEach items="${candidates}" var="can">
                         <tr>
                             <td>
@@ -80,6 +82,10 @@
                                     <i class="fa fa-edit mr-3"></i>
                                 </a>
                                 <c:out value="${can.name}"/>
+                            </td>
+                            <td>
+
+                                <c:out value="${cities.get(can.cityId)}"/>
                             </td>
                             <td>
                                 <img src="<c:url value='/download?name=${can.id}'/>" width="100px" height="100px" alt="image"/>

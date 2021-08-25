@@ -21,6 +21,25 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
 
     <title>Работа мечты</title>
 </head>
@@ -64,20 +83,29 @@
                 Регистрация
             </div>
             <div class="card-body">
-                <form action="<%=request.getContextPath()%>/reg.do" method="post">
+                <form class="needs-validation" action="<%=request.getContextPath()%>/reg.do" method="post" novalidate>
                     <div class="form-group">
-                        <label>Имя
-                            <input type="text" class="form-control" name="name">
+                        <label>Имя:
+                            <input type="text" class="form-control" name="name" required>
+                            <div class="invalid-feedback">
+                                Введите имя.
+                            </div>
                         </label>
                     </div>
                     <div class="form-group">
-                        <label>Почта
-                            <input type="text" class="form-control" name="email">
+                        <label>Почта:
+                            <input type="text" class="form-control" name="email" required>
+                            <div class="invalid-feedback">
+                                Введите адрес электронной почты.
+                            </div>
                         </label>
                     </div>
                     <div class="form-group">
-                        <label>Пароль
-                            <input type="text" class="form-control" name="password">
+                        <label>Пароль:
+                            <input type="password" class="form-control" name="password" required>
+                            <div class="invalid-feedback">
+                                Введите пароль.
+                            </div>
                         </label>
                     </div>
                     <button type="submit" class="btn btn-primary">Зарегистрироваться</button>

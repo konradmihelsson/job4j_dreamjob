@@ -2,7 +2,6 @@ package ru.job4j.dream.servlet;
 
 import ru.job4j.dream.model.Candidate;
 import ru.job4j.dream.store.PsqlStore;
-import ru.job4j.dream.store.Store;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -22,8 +21,9 @@ public class CandidateServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("UTF-8");
         PsqlStore.instOf().save(new Candidate(
-                        Integer.valueOf(req.getParameter("id")),
-                        req.getParameter("candidateName")
+                        Integer.parseInt(req.getParameter("id")),
+                        req.getParameter("candidateName"),
+                        PsqlStore.instOf().getCityIdByCityName(req.getParameter("candidateCity"))
                 )
         );
         resp.sendRedirect(req.getContextPath() + "/candidates.do");

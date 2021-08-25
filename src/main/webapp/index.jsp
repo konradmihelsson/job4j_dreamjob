@@ -1,3 +1,4 @@
+<%@ page import="ru.job4j.dream.store.PsqlStore" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!doctype html>
@@ -62,6 +63,18 @@
                 Сегодняшние вакансии.
             </div>
             <div class="card-body">
+                <table class="table">
+                    <tbody>
+                    <c:set var="posts" value="<%=PsqlStore.instOf().findAllPostsForLastDay()%>"/>
+                    <c:forEach items="${posts}" var="post">
+                        <tr>
+                            <td>
+                                <c:out value="${post.name}"/>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -71,6 +84,25 @@
                 Сегодняшние кандидаты.
             </div>
             <div class="card-body">
+                <table class="table">
+                    <tbody>
+                    <c:set var="cities" value="<%=PsqlStore.instOf().findAllCities()%>"/>
+                    <c:set var="candidates" value="<%=PsqlStore.instOf().findAllCandidatesForLastDay()%>"/>
+                    <c:forEach items="${candidates}" var="can">
+                        <tr>
+                            <td>
+                                <img src="<c:url value='/download?name=${can.id}'/>" width="100px" height="100px" alt="image"/>
+                            </td>
+                            <td>
+                                <c:out value="${can.name}"/>
+                            </td>
+                            <td>
+                                <c:out value="${cities.get(can.cityId)}"/>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

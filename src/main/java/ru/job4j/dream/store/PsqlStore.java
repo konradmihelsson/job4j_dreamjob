@@ -10,14 +10,10 @@ import ru.job4j.dream.model.User;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
+import java.sql.*;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 public class PsqlStore implements Store {
 
@@ -81,7 +77,8 @@ public class PsqlStore implements Store {
         ) {
             try (ResultSet it = ps.executeQuery()) {
                 while (it.next()) {
-                    candidates.add(new Candidate(it.getInt("id"), it.getString("name")));
+                    candidates.add(new Candidate(it.getInt("id"), it.getString("name"),
+                            it.getInt("city_id")));
                 }
             }
         } catch (SQLException e) {
@@ -120,10 +117,12 @@ public class PsqlStore implements Store {
     private Post create(Post post) {
         try (Connection cn = pool.getConnection();
              PreparedStatement ps =
-                     cn.prepareStatement("INSERT INTO post(name) VALUES (?)",
+                     cn.prepareStatement("INSERT INTO post(name, created) VALUES (?, ?)",
                              PreparedStatement.RETURN_GENERATED_KEYS)
         ) {
             ps.setString(1, post.getName());
+            ps.setTimestamp(2,
+                    Timestamp.valueOf(OffsetDateTime.now().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()));
             ps.execute();
             try (ResultSet id = ps.getGeneratedKeys()) {
                 if (id.next()) {
@@ -151,10 +150,13 @@ public class PsqlStore implements Store {
     private Candidate create(Candidate candidate) {
         try (Connection cn = pool.getConnection();
              PreparedStatement ps =
-                     cn.prepareStatement("INSERT INTO candidates(name) VALUES (?)",
+                     cn.prepareStatement("INSERT INTO candidates(name, city_id, created) VALUES (?, ?, ?)",
                              PreparedStatement.RETURN_GENERATED_KEYS)
         ) {
             ps.setString(1, candidate.getName());
+            ps.setInt(2, candidate.getCityId());
+            ps.setTimestamp(3,
+                    Timestamp.valueOf(OffsetDateTime.now().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()));
             ps.execute();
             try (ResultSet id = ps.getGeneratedKeys()) {
                 if (id.next()) {
@@ -169,10 +171,11 @@ public class PsqlStore implements Store {
 
     private void update(Candidate candidate) {
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement("UPDATE candidates set name = ? where id = ?")
+             PreparedStatement ps = cn.prepareStatement("UPDATE candidates set name = ?, city_id = ? where id = ?")
         ) {
             ps.setString(1, candidate.getName());
-            ps.setInt(2, candidate.getId());
+            ps.setInt(2, candidate.getCityId());
+            ps.setInt(3, candidate.getId());
             ps.execute();
         } catch (SQLException e) {
             LOG.error("Exception logging", e);
@@ -237,12 +240,13 @@ public class PsqlStore implements Store {
     public Candidate findCandidateById(int id) {
         Candidate result = null;
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement("SELECT id, name FROM candidates where id = ?")
+             PreparedStatement ps = cn.prepareStatement("SELECT id, name, city_id FROM candidates where id = ?")
         ) {
             ps.setInt(1, id);
             try (ResultSet it = ps.executeQuery()) {
                 if (it.next()) {
-                    result = new Candidate(it.getInt(1), it.getString(2));
+                    result = new Candidate(it.getInt(1), it.getString(2),
+                            it.getInt(3));
                 }
             }
         } catch (SQLException e) {
@@ -253,19 +257,25 @@ public class PsqlStore implements Store {
 
     @Override
     public User findUserByEmail(String email) {
-        User result = null;
+        String query = "SELECT id, name, email, password FROM users where email = ?";
+        return findUserBy(query, email);
+    }
+
+    public User findUserByName(String name) {
+        String query = "SELECT id, name, email, password FROM users where name = ?";
+        return findUserBy(query, name);
+    }
+
+    @Override
+    public int getCityIdByCityName(String cityName) {
+        int result = 0;
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps =
-                     cn.prepareStatement("SELECT id, name, email, password FROM users where email = ?")
+             PreparedStatement ps = cn.prepareStatement("SELECT id FROM cities where name = ?")
         ) {
-            ps.setString(1, email);
+            ps.setString(1, cityName);
             try (ResultSet it = ps.executeQuery()) {
                 if (it.next()) {
-                    result = new User();
-                    result.setId(it.getInt(1));
-                    result.setName(it.getString(2));
-                    result.setEmail(it.getString(3));
-                    result.setPassword(it.getString(4));
+                    result = it.getInt(1);
                 }
             }
         } catch (SQLException e) {
@@ -274,26 +284,21 @@ public class PsqlStore implements Store {
         return result;
     }
 
-    public User findUserByName(String name) {
-        User result = null;
+    @Override
+    public Map<Integer, String> findAllCities() {
+        Map<Integer, String> cities = new HashMap<>();
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps =
-                     cn.prepareStatement("SELECT id, name, email, password FROM users where name = ?")
+             PreparedStatement ps = cn.prepareStatement("SELECT * FROM cities")
         ) {
-            ps.setString(1, name);
             try (ResultSet it = ps.executeQuery()) {
-                if (it.next()) {
-                    result = new User();
-                    result.setId(it.getInt(1));
-                    result.setName(it.getString(2));
-                    result.setEmail(it.getString(3));
-                    result.setPassword(it.getString(4));
+                while (it.next()) {
+                    cities.put(it.getInt("id"), it.getString("name"));
                 }
             }
         } catch (SQLException e) {
             LOG.error("Exception logging", e);
         }
-        return result;
+        return cities;
     }
 
     public void removeCandidateById(int id) {
@@ -305,5 +310,72 @@ public class PsqlStore implements Store {
         } catch (SQLException e) {
             LOG.error("Exception logging", e);
         }
+    }
+
+    public Collection<Post> findAllPostsForLastDay() {
+        List<Post> posts = new ArrayList<>();
+        Timestamp from =
+                Timestamp.valueOf(OffsetDateTime.now().minusDays(1).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
+        Timestamp to =
+                Timestamp.valueOf(OffsetDateTime.now().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps = cn.prepareStatement("SELECT * FROM post WHERE created BETWEEN ? AND ?")
+        ) {
+            ps.setTimestamp(1, from);
+            ps.setTimestamp(2, to);
+            try (ResultSet it = ps.executeQuery()) {
+                while (it.next()) {
+                    posts.add(new Post(it.getInt("id"), it.getString("name")));
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
+        }
+        return posts;
+    }
+
+    public Collection<Candidate> findAllCandidatesForLastDay() {
+        List<Candidate> candidates = new ArrayList<>();
+        Timestamp from =
+                Timestamp.valueOf(OffsetDateTime.now().minusDays(1).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
+        Timestamp to =
+                Timestamp.valueOf(OffsetDateTime.now().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps = cn.prepareStatement("SELECT * FROM candidates WHERE created BETWEEN ? AND ?")
+        ) {
+            ps.setTimestamp(1, from);
+            ps.setTimestamp(2, to);
+            try (ResultSet it = ps.executeQuery()) {
+                while (it.next()) {
+                    candidates.add(new Candidate(it.getInt("id"), it.getString("name"),
+                            it.getInt("city_id")));
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
+        }
+        return candidates;
+    }
+
+    public User findUserBy(String query, String value) {
+        User result = null;
+        try (Connection cn = pool.getConnection();
+             PreparedStatement ps =
+                     cn.prepareStatement(query)
+        ) {
+            ps.setString(1, value);
+            try (ResultSet it = ps.executeQuery()) {
+                if (it.next()) {
+                    result = new User();
+                    result.setId(it.getInt(1));
+                    result.setName(it.getString(2));
+                    result.setEmail(it.getString(3));
+                    result.setPassword(it.getString(4));
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Exception logging", e);
+        }
+        return result;
     }
 }
