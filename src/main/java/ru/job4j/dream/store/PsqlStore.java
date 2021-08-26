@@ -285,14 +285,15 @@ public class PsqlStore implements Store {
     }
 
     @Override
-    public Map<Integer, String> findAllCities() {
-        Map<Integer, String> cities = new HashMap<>();
+    public List<String> findAllCities() {
+        List<String> cities = new ArrayList<>();
+        cities.add("Cities stub element for index = 0");
         try (Connection cn = pool.getConnection();
              PreparedStatement ps = cn.prepareStatement("SELECT * FROM cities")
         ) {
             try (ResultSet it = ps.executeQuery()) {
                 while (it.next()) {
-                    cities.put(it.getInt("id"), it.getString("name"));
+                    cities.add(it.getString("name"));
                 }
             }
         } catch (SQLException e) {

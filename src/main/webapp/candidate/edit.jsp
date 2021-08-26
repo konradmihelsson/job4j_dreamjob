@@ -48,8 +48,8 @@
                 url: 'http://localhost:8080/dreamjob/city',
                 dataType: 'json'
             }).done(function (data) {
-                for (var city of data) {
-                    $('#candidateCity').append('<option>' + city + '</option>')
+                for (let i = 1; i < data.length; i++) {
+                    $('#candidateCity').append('<option>' + data[i] + '</option>')
                 }
             }).fail(function (err) {
                 console.log(err);

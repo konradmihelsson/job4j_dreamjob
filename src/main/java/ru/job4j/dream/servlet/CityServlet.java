@@ -10,18 +10,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 
 public class CityServlet extends HttpServlet {
 
-    private final Collection<String> cities = PsqlStore.instOf().findAllCities().values();
     private static final Gson GSON = new GsonBuilder().create();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json; charset=utf-8");
         OutputStream output = resp.getOutputStream();
-        String json = GSON.toJson(cities);
+        String json = GSON.toJson(PsqlStore.instOf().findAllCities());
         output.write(json.getBytes(StandardCharsets.UTF_8));
         output.flush();
         output.close();

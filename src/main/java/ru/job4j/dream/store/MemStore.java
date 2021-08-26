@@ -5,8 +5,10 @@ import ru.job4j.dream.model.Post;
 import ru.job4j.dream.model.User;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MemStore implements Store {
@@ -19,7 +21,7 @@ public class MemStore implements Store {
     private final Map<Integer, Post> posts = new ConcurrentHashMap<>();
     private final Map<Integer, Candidate> candidates = new ConcurrentHashMap<>();
     private final Map<Integer, User> users = new ConcurrentHashMap<>();
-    private final Map<Integer, String> cities = new ConcurrentHashMap<>();
+    private final List<String> cities = new CopyOnWriteArrayList<>();
 
     private MemStore() {
     }
@@ -103,18 +105,11 @@ public class MemStore implements Store {
 
     @Override
     public int getCityIdByCityName(String cityName) {
-        int result = -1;
-        for (Map.Entry<Integer, String> pair : cities.entrySet()) {
-            if (cityName.equals(pair.getValue())) {
-                result = pair.getKey();
-                break;
-            }
-        }
-        return result;
+        return cities.indexOf(cityName);
     }
 
     @Override
-    public Map<Integer, String> findAllCities() {
+    public List<String> findAllCities() {
         return cities;
     }
 

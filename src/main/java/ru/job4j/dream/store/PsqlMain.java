@@ -4,10 +4,6 @@ import ru.job4j.dream.model.Candidate;
 import ru.job4j.dream.model.Post;
 import ru.job4j.dream.model.User;
 
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 public class PsqlMain {
     public static void main(String[] args) {
         Store store = MemStore.instOf();
@@ -36,7 +32,5 @@ public class PsqlMain {
         User user2 = store.findUserByEmail("root@local");
         System.out.println("User ID: " + user2.getId() + ", User Name: " + user2.getName() + ", User Email: "
         + user2.getEmail() + ", User Password: " + user2.getPassword());
-
-        System.out.println(Timestamp.valueOf(OffsetDateTime.now().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()));
     }
 }

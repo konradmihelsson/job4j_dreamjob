@@ -5,7 +5,7 @@ import ru.job4j.dream.model.Post;
 import ru.job4j.dream.model.User;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 public interface Store {
 
@@ -31,7 +31,7 @@ public interface Store {
 
     int getCityIdByCityName(String cityName);
 
-    Map<Integer, String> findAllCities();
+    List<String> findAllCities();
 
     Collection<Post> findAllPostsForLastDay();
 

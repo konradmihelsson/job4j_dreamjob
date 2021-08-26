@@ -84,11 +84,11 @@
                                 <c:out value="${can.name}"/>
                             </td>
                             <td>
-
                                 <c:out value="${cities.get(can.cityId)}"/>
                             </td>
                             <td>
-                                <img src="<c:url value='/download?name=${can.id}'/>" width="100px" height="100px" alt="image"/>
+                                <img src="<c:url value='/download?name=${can.id}'/>" width="100px" height="100px"
+                                     alt="image"/>
                             </td>
                             <td>
                                 <a href='<c:url value="/candidate/upload.jsp?id=${can.id}"/>'>
