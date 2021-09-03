@@ -1,6 +1,7 @@
 package ru.job4j.dream.store;
 
 import ru.job4j.dream.model.Candidate;
+import ru.job4j.dream.model.City;
 import ru.job4j.dream.model.Post;
 import ru.job4j.dream.model.User;
 
@@ -14,9 +15,9 @@ public class PsqlMain {
             System.out.println(post.getId() + " " + post.getName());
         }
 
-        store.save(new Candidate(0, "Java Junior developer", 1));
-        store.save(new Candidate(1, "Java Junior developer update", 1));
-        store.save(new Candidate(0, "Java Middle developer", 1));
+        store.save(new Candidate(0, "Java Junior developer", new City(1, "Some City")));
+        store.save(new Candidate(1, "Java Junior developer update", new City(1, "Some City")));
+        store.save(new Candidate(0, "Java Middle developer", new City(1, "Some City")));
         System.out.println(store.findCandidateById(1).getName());
         store.removeCandidateById(1);
         for (Candidate candidate : store.findAllCandidates()) {

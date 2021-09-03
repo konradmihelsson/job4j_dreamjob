@@ -5,12 +5,12 @@ import java.util.Objects;
 public class Candidate {
     private int id;
     private String name;
-    private final int cityId;
+    private final City city;
 
-    public Candidate(int id, String name, int cityId) {
+    public Candidate(int id, String name, City city) {
         this.id = id;
         this.name = name;
-        this.cityId = cityId;
+        this.city = city;
     }
 
     public int getId() {
@@ -29,8 +29,8 @@ public class Candidate {
         this.name = name;
     }
 
-    public int getCityId() {
-        return cityId;
+    public City getCity() {
+        return city;
     }
 
     @Override

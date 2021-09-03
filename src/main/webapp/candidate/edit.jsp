@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="ru.job4j.dream.model.Candidate" %>
 <%@ page import="ru.job4j.dream.store.PsqlStore" %>
+<%@ page import="ru.job4j.dream.model.City" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -48,8 +49,8 @@
                 url: 'http://localhost:8080/dreamjob/city',
                 dataType: 'json'
             }).done(function (data) {
-                for (let i = 1; i < data.length; i++) {
-                    $('#candidateCity').append('<option>' + data[i] + '</option>')
+                for (let cityName of data) {
+                    $('#candidateCity').append('<option>' + cityName + '</option>')
                 }
             }).fail(function (err) {
                 console.log(err);
@@ -62,7 +63,7 @@
 <body>
 <%
     String id = request.getParameter("id");
-    Candidate candidate = new Candidate(0, "", 0);
+    Candidate candidate = new Candidate(0, "", new City(0, ""));
     if (id != null) {
         candidate = PsqlStore.instOf().findCandidateById(Integer.parseInt(id));
     }

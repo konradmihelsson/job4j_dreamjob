@@ -86,7 +86,6 @@
             <div class="card-body">
                 <table class="table">
                     <tbody>
-                    <c:set var="cities" value="<%=PsqlStore.instOf().findAllCities()%>"/>
                     <c:set var="candidates" value="<%=PsqlStore.instOf().findAllCandidatesForLastDay()%>"/>
                     <c:forEach items="${candidates}" var="can">
                         <tr>
@@ -97,7 +96,7 @@
                                 <c:out value="${can.name}"/>
                             </td>
                             <td>
-                                <c:out value="${cities.get(can.cityId)}"/>
+                                <c:out value="${can.city.name}"/>
                             </td>
                         </tr>
                     </c:forEach>

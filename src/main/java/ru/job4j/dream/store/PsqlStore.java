@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.dbcp2.BasicDataSource;
 import ru.job4j.dream.model.Candidate;
+import ru.job4j.dream.model.City;
 import ru.job4j.dream.model.Post;
 import ru.job4j.dream.model.User;
 
@@ -73,12 +74,13 @@ public class PsqlStore implements Store {
     public Collection<Candidate> findAllCandidates() {
         List<Candidate> candidates = new ArrayList<>();
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement("SELECT * FROM candidates")
+             PreparedStatement ps = cn.prepareStatement("SELECT can.id canid, can.name canname, c.id cid,"
+                     + "c.name cname FROM candidates can join cities c on c.id = can.city_id")
         ) {
             try (ResultSet it = ps.executeQuery()) {
                 while (it.next()) {
-                    candidates.add(new Candidate(it.getInt("id"), it.getString("name"),
-                            it.getInt("city_id")));
+                    candidates.add(new Candidate(it.getInt("canid"), it.getString("canname"),
+                            new City(it.getInt("cid"), it.getString("cname"))));
                 }
             }
         } catch (SQLException e) {
@@ -154,7 +156,7 @@ public class PsqlStore implements Store {
                              PreparedStatement.RETURN_GENERATED_KEYS)
         ) {
             ps.setString(1, candidate.getName());
-            ps.setInt(2, candidate.getCityId());
+            ps.setInt(2, candidate.getCity().getId());
             ps.setTimestamp(3,
                     Timestamp.valueOf(OffsetDateTime.now().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()));
             ps.execute();
@@ -174,7 +176,7 @@ public class PsqlStore implements Store {
              PreparedStatement ps = cn.prepareStatement("UPDATE candidates set name = ?, city_id = ? where id = ?")
         ) {
             ps.setString(1, candidate.getName());
-            ps.setInt(2, candidate.getCityId());
+            ps.setInt(2, candidate.getCity().getId());
             ps.setInt(3, candidate.getId());
             ps.execute();
         } catch (SQLException e) {
@@ -240,13 +242,14 @@ public class PsqlStore implements Store {
     public Candidate findCandidateById(int id) {
         Candidate result = null;
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement("SELECT id, name, city_id FROM candidates where id = ?")
+             PreparedStatement ps = cn.prepareStatement("SELECT can.id canid, can.name canname, c.id cid,"
+                     + "c.name cname FROM candidates can join cities c on c.id = can.city_id where can.id = ?")
         ) {
             ps.setInt(1, id);
             try (ResultSet it = ps.executeQuery()) {
                 if (it.next()) {
-                    result = new Candidate(it.getInt(1), it.getString(2),
-                            it.getInt(3));
+                    result = new Candidate(it.getInt("canid"), it.getString("canname"),
+                            new City(it.getInt("cid"), it.getString("cname")));
                 }
             }
         } catch (SQLException e) {
@@ -287,7 +290,6 @@ public class PsqlStore implements Store {
     @Override
     public List<String> findAllCities() {
         List<String> cities = new ArrayList<>();
-        cities.add("Cities stub element for index = 0");
         try (Connection cn = pool.getConnection();
              PreparedStatement ps = cn.prepareStatement("SELECT * FROM cities")
         ) {
@@ -342,14 +344,16 @@ public class PsqlStore implements Store {
         Timestamp to =
                 Timestamp.valueOf(OffsetDateTime.now().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
         try (Connection cn = pool.getConnection();
-             PreparedStatement ps = cn.prepareStatement("SELECT * FROM candidates WHERE created BETWEEN ? AND ?")
+             PreparedStatement ps = cn.prepareStatement("SELECT can.id canid, can.name canname, c.id cid, "
+                     + "c.name cname FROM candidates can join cities c on c.id = can.city_id "
+                     + "WHERE can.created BETWEEN ? AND ?")
         ) {
             ps.setTimestamp(1, from);
             ps.setTimestamp(2, to);
             try (ResultSet it = ps.executeQuery()) {
                 while (it.next()) {
-                    candidates.add(new Candidate(it.getInt("id"), it.getString("name"),
-                            it.getInt("city_id")));
+                    candidates.add(new Candidate(it.getInt("canid"), it.getString("canname"),
+                            new City(it.getInt("cid"), it.getString("cname"))));
                 }
             }
         } catch (SQLException e) {
