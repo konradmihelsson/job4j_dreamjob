@@ -1,43 +1,69 @@
 package ru.job4j.dream.servlet;
 
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import ru.job4j.dream.model.Post;
-import ru.job4j.dream.store.Store;
 import ru.job4j.dream.store.PsqlStore;
-import ru.job4j.dream.store.MemStore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Properties;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(PsqlStore.class)
 public class PostServletTest {
+
+    static Connection connection;
+
+    @BeforeClass
+    public static void initConnection() {
+        try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("db.properties")) {
+            Properties config = new Properties();
+            config.load(in);
+            Class.forName(config.getProperty("jdbc.driver"));
+            connection = DriverManager.getConnection(
+                    config.getProperty("jdbc.url"),
+                    config.getProperty("jdbc.username"),
+                    config.getProperty("jdbc.password")
+            );
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @AfterClass
+    public static void closeConnection() throws SQLException {
+        connection.close();
+    }
+
+    @After
+    public void wipeTables() throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                "TRUNCATE TABLE post;"
+                        + "ALTER TABLE post ALTER COLUMN id RESTART WITH 1;"
+        )) {
+            ps.execute();
+        }
+    }
 
     @Test
     public void whenCreatePost() throws IOException {
-        Store store = MemStore.instOf();
-
-        PowerMockito.mockStatic(PsqlStore.class);
-        PowerMockito.when(PsqlStore.instOf()).thenReturn(store);
-
         HttpServletRequest req = mock(HttpServletRequest.class);
         HttpServletResponse resp = mock(HttpServletResponse.class);
-
-        PowerMockito.when(req.getParameter("id")).thenReturn("1");
-        PowerMockito.when(req.getParameter("name")).thenReturn("n");
-
+        when(req.getParameter("id")).thenReturn("0");
+        when(req.getParameter("name")).thenReturn("Java Job");
         new PostServlet().doPost(req, resp);
-
-        Post result = store.findAllPosts().iterator().next();
-        assertThat(result.getName(), is("n"));
+        Post result = PsqlStore.instOf().findAllPosts().iterator().next();
+        assertThat(result.getName(), is("Java Job"));
     }
 }
