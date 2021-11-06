@@ -27,7 +27,7 @@ public class PostServletTest {
 
     @BeforeClass
     public static void initConnection() {
-        try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("db.properties")) {
+        try (InputStream in = PostServletTest.class.getClassLoader().getResourceAsStream("db.properties")) {
             Properties config = new Properties();
             config.load(in);
             Class.forName(config.getProperty("jdbc.driver"));
